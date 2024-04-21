@@ -1,4 +1,4 @@
-package org.example.calculator;
+package org.example.Executor;
 
 import lombok.Setter;
 import org.example.model.answer.Answer;
@@ -11,20 +11,20 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * 计算答案得分
+ * 计算答案得分 的执行类
  */
 
-public class AnswerCal {
+public class AnswerCalExecutor {
     @Setter
     private Map<String, Exam> exams;
 
-    private static AnswerCal INSTANCE;
+    private static AnswerCalExecutor INSTANCE;
 
     static {
-        INSTANCE = new AnswerCal();
+        INSTANCE = new AnswerCalExecutor();
     }
 
-    public static AnswerCal getInstance() {
+    public static AnswerCalExecutor getInstance() {
         return INSTANCE;
     }
 
@@ -39,8 +39,7 @@ public class AnswerCal {
         Map<String, Question> questionMap = exams.get(Answer.getExamId()).getQuestions().stream().collect(Collectors.toMap(Question::getId, Function.identity()));
         questionMap.forEach((id, question) -> {
             String answer = Answer.getAnswers().get(id);
-            int type = question.getQuestionBasicInfo().getType();
-
+            // 根据题目类型获取对应的策略
             CalculateStrategy calculateStrategy = StrategyFactory.getStrategy(question);
             CalculateScorer calculateScorer = new CalculateScorer(calculateStrategy);
             int score = calculateScorer.calculateScore(question, answer);

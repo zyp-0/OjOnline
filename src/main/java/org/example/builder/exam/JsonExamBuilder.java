@@ -12,6 +12,8 @@ import org.example.model.question.QuestionBasicInfo;
 import org.example.model.question.QuestionParam;
 
 import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class JsonExamBuilder extends ExamBuilder{
@@ -60,10 +62,6 @@ public class JsonExamBuilder extends ExamBuilder{
             String questionContent = questionJson.getStr("question");
             int points = questionJson.getInt("points");
 
-//            questionJson.remove("id");
-//            questionJson.remove("type");
-//            questionJson.remove("question");
-//            questionJson.remove("points");
 
             // 构建题目基本信息
             QuestionBasicInfo questionBasicInfo = new QuestionBasicInfo(id, type, questionContent, points);
@@ -109,6 +107,22 @@ public class JsonExamBuilder extends ExamBuilder{
                 QuestionFactory questionFactory = QuestionFactoryProducer.getQuestionFactory(type, questionParam);
                 q = questionFactory.createQuestion();
             }else if (type == 3) { // 编程题
+                Long timeLimit = questionJson.getLong("timeLimit");
+                questionParam.addExtra("timeLimit", timeLimit);
+
+                // 提取samples
+                JSONArray samples = questionJson.getJSONArray("samples");
+                // 将samples中每个sample的input和output提取出来，放入map中
+                Map<String, String> sampleMap = new HashMap<>();
+                for (int j = 0; j < samples.size(); j++) {
+                    JSONObject sample = samples.getJSONObject(j);
+                    String input = sample.getStr("input");
+                    String output = sample.getStr("output");
+                    sampleMap.put(input,output);
+                }
+                questionParam.addExtra("samples", sampleMap);
+
+
                 // 创建编程题工厂
                 QuestionFactory questionFactory = QuestionFactoryProducer.getQuestionFactory(type, questionParam);
                 q = questionFactory.createQuestion();

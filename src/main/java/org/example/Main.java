@@ -4,16 +4,15 @@ import org.example.builder.answer.AnswerBuilder;
 import org.example.builder.exam.ExamBuilder;
 import org.example.builder.exam.ExamBuilderFactory;
 import org.example.builder.exam.ExamDirector;
-import org.example.calculator.AnswerCal;
+import org.example.Executor.AnswerCalExecutor;
 import org.example.model.answer.Answer;
 import org.example.model.exam.Exam;
+import org.example.utils.CustomThreadPool;
 import org.example.utils.ScoreDAO;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Main {
@@ -26,6 +25,9 @@ public class Main {
         // 输出文件路径
         String output = args[1];
         // TODO:在下面调用你实现的功能
+
+        // 创建 线程为5 的 线程池
+        CustomThreadPool threadPool  = new CustomThreadPool(5);
 
         // 读取题目和答案，生成考试对象
         // 读取题目
@@ -62,25 +64,31 @@ public class Main {
             File[] answerFiles = answersFolder.listFiles();
 
             // 创建
-            AnswerCal answerCal = new AnswerCal();
-            answerCal.setExams(exams);
+            AnswerCalExecutor answerCalExecutor = new AnswerCalExecutor();
+            answerCalExecutor.setExams(exams);
+//            threadPool.submit(() -> {
+                if (answerFiles != null) {
+                    for (File file : answerFiles) {
+                        // 如果是文件夹则跳过
+                        if(file.isDirectory()){
+                            continue;
+                        }
+                        // 创建任务，提交给线程池执行
 
-            if (answerFiles != null) {
-                for (File file : answerFiles) {
-                    // 读取作答文件
-                    AnswerBuilder answerBuilder = new AnswerBuilder(file.getPath());
-                    Answer answer = answerBuilder.buildAnswer();
+                        // 读取作答文件
+                        AnswerBuilder answerBuilder = new AnswerBuilder(file.getPath());
+                        Answer answer = answerBuilder.buildAnswer();
 
-                    // 根据考试信息和答案信息计算每个考生的 得分
-                    Integer res = answerCal.calculate(answer);
+                        // 根据考试信息和答案信息计算每个考生的 得分
+                        Integer res = answerCalExecutor.calculate(answer);
 
-                    scoreDAO.saveScore(answer.getExamId(), answer.getStuId(), res);
-                    // 将考生的得分写入output文件
+                        scoreDAO.saveScore(answer.getExamId(), answer.getStuId(), res);
+
+                        // 将考生的得分写入output文件
+                    }
+                    scoreDAO.flush();
                 }
-                scoreDAO.flush();
-            }
-
-
+//            });
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

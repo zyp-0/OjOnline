@@ -1,6 +1,6 @@
-package org.example.calculator.single;
+package org.example.Executor.single;
 
-import org.example.calculator.CalculateStrategy;
+import org.example.Executor.CalculateStrategy;
 import org.example.model.question.Question;
 import org.example.model.question.SingleQ;
 

@@ -1,10 +1,10 @@
-package org.example.calculator;
+package org.example.Executor;
 
-import org.example.calculator.code.FullScoreCodeStrategy;
-import org.example.calculator.mutli.MultiFixStrategy;
-import org.example.calculator.mutli.MultiNotingStrategy;
-import org.example.calculator.mutli.MultiPartialStrategy;
-import org.example.calculator.single.SingleStrategy;
+import org.example.Executor.code.CodeStrategy;
+import org.example.Executor.mutli.MultiFixStrategy;
+import org.example.Executor.mutli.MultiNotingStrategy;
+import org.example.Executor.mutli.MultiPartialStrategy;
+import org.example.Executor.single.SingleStrategy;
 import org.example.model.question.MultiQ;
 import org.example.model.question.Question;
 
@@ -13,7 +13,7 @@ public class StrategyFactory {
         if (question.getQuestionBasicInfo().getType() == 1) {
             return new SingleStrategy();
         } else if (question.getQuestionBasicInfo().getType() == 3) {
-            return new FullScoreCodeStrategy();
+            return new CodeStrategy();
         } else if (question.getQuestionBasicInfo().getType() == 2) {
             MultiQ multiQ = (MultiQ) question;
             String mode = multiQ.getScoreMode();

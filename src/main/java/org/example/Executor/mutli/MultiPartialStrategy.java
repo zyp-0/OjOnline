@@ -1,6 +1,6 @@
-package org.example.calculator.mutli;
+package org.example.Executor.mutli;
 
-import org.example.calculator.CalculateStrategy;
+import org.example.Executor.CalculateStrategy;
 import org.example.model.question.MultiQ;
 import org.example.model.question.Question;
 import org.example.utils.AnswerUtil;

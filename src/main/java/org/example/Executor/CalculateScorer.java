@@ -1,4 +1,4 @@
-package org.example.calculator;
+package org.example.Executor;
 
 import lombok.AllArgsConstructor;
 import org.example.model.question.Question;

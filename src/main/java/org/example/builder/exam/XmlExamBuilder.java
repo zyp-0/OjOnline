@@ -2,6 +2,8 @@ package org.example.builder.exam;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.XmlUtil;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
 import org.example.builder.question.QuestionFactory;
 import org.example.builder.question.QuestionFactoryProducer;
 import org.example.model.exam.Exam;
@@ -13,7 +15,9 @@ import org.w3c.dom.NodeList;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class XmlExamBuilder extends ExamBuilder {
     Document document = null;
@@ -102,6 +106,24 @@ public class XmlExamBuilder extends ExamBuilder {
                 QuestionFactory questionFactory = QuestionFactoryProducer.getQuestionFactory(type, questionParam);
                 q = questionFactory.createQuestion();
             } else if (type == 3) {
+
+                Long timeLimit = Long.parseLong(XmlUtil.elementText(question, "timeLimit"));
+                questionParam.addExtra("timeLimit", timeLimit);
+
+                // 提取samples
+                Element samples = XmlUtil.getElement(question,"samples");
+                if(samples != null){
+                    NodeList sampleList = samples.getElementsByTagName("sample");
+                    // 将samples中每个sample的input和output提取出来，放入map中
+                    Map<String, String> sampleMap = new HashMap<>();
+                    for (int j = 0; j < sampleList.getLength(); j++) {
+                        Element sample = (Element) sampleList.item(j);
+                        String input = XmlUtil.elementText(sample, "input");
+                        String output = XmlUtil.elementText(sample, "output");
+                        sampleMap.put(input, output);
+                    }
+                    questionParam.addExtra("samples", sampleMap);
+                }
                 QuestionFactory questionFactory = QuestionFactoryProducer.getQuestionFactory(type, questionParam);
                 q = questionFactory.createQuestion();
             }
