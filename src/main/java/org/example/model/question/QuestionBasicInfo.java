@@ -12,4 +12,6 @@ public class QuestionBasicInfo{
     private int type;
     private String question;
     private int points;
+
+    public String getExamId() {return id;}
 }

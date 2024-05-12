@@ -25,12 +25,26 @@ public class JavaCodeProcessor implements CodeProcessor {
     }
 
     @Override
-    public String execute(String className, String[] args) throws IOException, InterruptedException {
+    public String execute(String className, String[] args, long timeLimit) throws IOException, InterruptedException {
         // 编写代码执行逻辑，执行编译好的 Java 类并传入参数
         // 调用命令行命令来执行代码
-        String Path =  PathUtil.getClassPath();
-        Process process = Runtime.getRuntime().exec("java -cp " + Path + " " + className + " " + String.join(" ", args));
+        String Path = PathUtil.getClassPath();
+        ProcessBuilder processBuilder = new ProcessBuilder("java", "-cp", Path, className);
+        Process process = processBuilder.start();
 
+        // 记录执行开始时间
+        long startTime = System.currentTimeMillis();
+
+        // 创建新线程来等待执行完成
+        Thread timeoutThread = new Thread(() -> {
+            try {
+                Thread.sleep(timeLimit); // 等待超时时间
+                process.destroyForcibly(); // 强制终止进程
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt(); // 重新设置中断标志
+            }
+        });
+        timeoutThread.start();
 
         // 读取代码执行的输出
         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -40,11 +54,29 @@ public class JavaCodeProcessor implements CodeProcessor {
             output.append(line);
         }
 
+        BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+        while ((line = errorReader.readLine()) != null) {
+            // 处理编译错误信息
+            System.out.println(line);
+        }
+
         // 等待执行完成
         int exitCode = process.waitFor();
         if (exitCode != 0) {
             throw new RuntimeException("Execution failed");
         }
+
+        // 计算执行时间
+        long endTime = System.currentTimeMillis();
+        long executionTime = endTime - startTime;
+
+        // 判断是否超时（考虑容差范围）
+        long timeDifference = executionTime - timeLimit;
+        if (timeDifference > 100) { // 设置容差范围为100毫秒
+            throw new RuntimeException("Execution time exceeded");
+        }
+
+        timeoutThread.interrupt(); // 执行完成则终止超时线程
 
         return output.toString();
     }

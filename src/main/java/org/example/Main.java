@@ -7,6 +7,7 @@ import org.example.builder.exam.ExamDirector;
 import org.example.Executor.AnswerCalExecutor;
 import org.example.model.answer.Answer;
 import org.example.model.exam.Exam;
+import org.example.utils.ComplexityDAO;
 import org.example.utils.CustomThreadPool;
 import org.example.utils.ScoreDAO;
 
@@ -26,8 +27,7 @@ public class Main {
         String output = args[1];
         // TODO:在下面调用你实现的功能
 
-        // 创建 线程为5 的 线程池
-        CustomThreadPool threadPool  = new CustomThreadPool(5);
+
 
         // 读取题目和答案，生成考试对象
         // 读取题目
@@ -56,9 +56,12 @@ public class Main {
                 System.err.println("指定的文件夹不存在或不是一个文件夹");
             }
 
-            // 设置 得分文件 输出路径
+            // 得分文件 复杂度文件
             ScoreDAO scoreDAO = ScoreDAO.getInstance();
-            scoreDAO.setPath(output);
+            ComplexityDAO complexityDAO = ComplexityDAO.getInstance();
+
+            scoreDAO.setPath(output + System.getProperty("file.separator") + "output.csv");
+            complexityDAO.setPath(output + System.getProperty("file.separator") + "output_complexity.csv");
 
             File answersFolder = new File(answersPath);
             File[] answerFiles = answersFolder.listFiles();
@@ -87,6 +90,7 @@ public class Main {
                         // 将考生的得分写入output文件
                     }
                     scoreDAO.flush();
+                    complexityDAO.flush();
                 }
 //            });
         } catch (IOException e) {
